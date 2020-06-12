@@ -9,6 +9,7 @@
   "author": "dss4f",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^3.5.8"
+    "mongodb": "^3.5.8",
+    "password-prompt": "^1.1.2"
   }
 }
