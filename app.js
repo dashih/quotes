@@ -45,7 +45,7 @@ async function run() {
             ]).next();
         }
 
-        let formattedQuote = util.format("%s\n-%s\n\n", selection.quote, selection.speaker);
+        let formattedQuote = util.format("%s\n- %s\n\n", selection.quote, selection.speaker);
         await fsAsync.writeFile("/etc/motd.d/quote", formattedQuote, "utf8");
     } catch (err) {
         console.error(err);
