@@ -1,6 +1,7 @@
 "use strict";
 
-const MongoClient = require('mongodb').MongoClient;
+const mongo = require('mongodb');
+const MongoClient = mongo.MongoClient;
 const util = require('util');
 const fsAsync = require('fs').promises;
 
@@ -27,12 +28,24 @@ async function run() {
 
     try {
         let quotes = client.db(db).collection(collection);
-        let randomSelection = await quotes.aggregate([
-            { $match: {} },
-            { $sample: { size: 1} }
-        ]).next();
+        let selection = null;
+        if (process.argv.length == 3) {
+            // Find the passed _id and select that quote.
+            selection = await quotes.findOne({
+                "_id": new mongo.ObjectId(process.argv[2].toString())
+            });
 
-        let formattedQuote = util.format("%s\n-%s\n\n", randomSelection.quote, randomSelection.speaker);
+            // Print the selection, because this mode is run on-demand.
+            console.log(selection);
+        } else {
+            // Select a random quote.
+            selection = await quotes.aggregate([
+                { $match: {} },
+                { $sample: { size: 1} }
+            ]).next();
+        }
+
+        let formattedQuote = util.format("%s\n-%s\n\n", selection.quote, selection.speaker);
         await fsAsync.writeFile("/etc/motd.d/quote", formattedQuote, "utf8");
     } catch (err) {
         console.error(err);

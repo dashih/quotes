@@ -42,10 +42,12 @@ async function run() {
 
     try {
         let quotes = client.db(db).collection(collection);
-        await quotes.insertOne({
+        let ret = await quotes.insertOne({
             speaker: speaker,
             quote: newQuote
         });
+
+        console.log(ret);
     } catch (err) {
         console.error(err);
     } finally {
