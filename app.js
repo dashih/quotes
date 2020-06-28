@@ -1,26 +1,38 @@
 "use strict";
 
-const mongo = require('mongodb');
-const MongoClient = mongo.MongoClient;
-const util = require('util');
-const fsAsync = require('fs').promises;
+const express = require("express");
+const bodyParser = require("body-parser");
+const http = require("http");
+const MongoClient = require("mongodb").MongoClient;
+const util = require("util");
+
+const port = 8088;
+const app = express();
 
 const dbHost = Object.freeze("localhost:27017");
-const dbUser = Object.freeze("quotesbackup");
-const dbPassword = Object.freeze(encodeURIComponent("R9N6j2Zb#28oeTSZ9CqR5KH$X2cHjJfWyc7M@4EVgUv7T@yGR"));
+const dbUser = Object.freeze("quotes");
 const db = Object.freeze("quotes");
 const collection = Object.freeze("quotes");
-const dbConn = Object.freeze(util.format(
-    'mongodb://%s:%s@%s/%s',
-    dbUser,
-    dbPassword,
-    dbHost,
-    db));
 
-async function run() {
+app.use(express.static("client"));
+app.use(bodyParser.json());
+
+app.post("/submit", async (req, res) => {
+    let dbPassword = encodeURIComponent(req.body.password);
+    let speaker = req.body.speaker;
+    let quote = req.body.quote;
+
+    let dbConn = Object.freeze(util.format(
+        'mongodb://%s:%s@%s/%s',
+        dbUser,
+        dbPassword,
+        dbHost,
+        db));
     let client = await MongoClient.connect(dbConn, { useNewUrlParser: true, useUnifiedTopology: true })
         .catch(connErr => {
+            res.status(500).send(connErr);
             console.error(connErr);
+            return;
         });
     if (client == null) {
         return;
@@ -28,30 +40,17 @@ async function run() {
 
     try {
         let quotes = client.db(db).collection(collection);
-        let selection = null;
-        if (process.argv.length == 3) {
-            // Find the passed _id and select that quote.
-            selection = await quotes.findOne({
-                "_id": new mongo.ObjectId(process.argv[2].toString())
-            });
+        let ret = await quotes.insertOne({
+            speaker: speaker,
+            quote: quote
+        });
 
-            // Print the selection, because this mode is run on-demand.
-            console.log(selection);
-        } else {
-            // Select a random quote.
-            selection = await quotes.aggregate([
-                { $match: {} },
-                { $sample: { size: 1} }
-            ]).next();
-        }
-
-        let formattedQuote = util.format("%s\n- %s\n\n", selection.quote, selection.speaker);
-        await fsAsync.writeFile("/etc/motd.d/quote", formattedQuote, "utf8");
+        res.send({ newId: ret.insertedId });
     } catch (err) {
-        console.error(err);
+        res.status(500).send(err);
     } finally {
         client.close();
     }
-}
+});
 
-run();
+http.createServer(app).listen(port);
