@@ -1,0 +1,9 @@
+{
+    "port": 0,
+    "sslKeyFile": "",
+    "sslCertFile": "",
+    "sslCaFile": "",
+    "dbHost": "",
+    "db": "",
+    "dbReadWriteUser": ""
+}

@@ -1,18 +1,25 @@
 "use strict";
 
+const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
-const http = require("http");
+const https = require("https");
 const MongoClient = require("mongodb").MongoClient;
 const util = require("util");
 
-const port = 8088;
-const app = express();
+const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+const port = config["port"];
+const dbHost = config["dbHost"];
+const dbUser = config["dbReadWriteUser"];
+const db = config["db"];
+const collection = config["db"];
+const httpsOptions = {
+    key: fs.readFileSync(config['sslKeyFile']),
+    cert: fs.readFileSync(config['sslCertFile']),
+    ca: fs.readFileSync(config['sslCaFile'])
+};
 
-const dbHost = Object.freeze("localhost:27017");
-const dbUser = Object.freeze("quotes");
-const db = Object.freeze("quotes");
-const collection = Object.freeze("quotes");
+const app = express();
 
 app.use(express.static("client"));
 app.use(bodyParser.json());
@@ -53,4 +60,4 @@ app.post("/submit", async (req, res) => {
     }
 });
 
-http.createServer(app).listen(port);
+https.createServer(httpsOptions, app).listen(port);
