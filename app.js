@@ -3,7 +3,7 @@
 const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
-const https = require("https");
+const http = require("http");
 const MongoClient = require("mongodb").MongoClient;
 const util = require("util");
 
@@ -13,11 +13,6 @@ const dbHost = config["dbHost"];
 const dbUser = config["dbReadWriteUser"];
 const db = config["db"];
 const collection = config["db"];
-const httpsOptions = {
-    key: fs.readFileSync(config['sslKeyFile']),
-    cert: fs.readFileSync(config['sslCertFile']),
-    ca: fs.readFileSync(config['sslCaFile'])
-};
 
 const app = express();
 
@@ -60,4 +55,4 @@ app.post("/submit", async (req, res) => {
     }
 });
 
-https.createServer(httpsOptions, app).listen(port);
+http.createServer(app).listen(port);
