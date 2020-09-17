@@ -1,7 +1,6 @@
 function submitButtonClick() {
     $("#submitButton").attr("disabled", true);
     let payload = {
-        "password": $("#pwd").val(),
         "speaker": $("#speaker").val(),
         "quote": $("#quote").val()
     }
@@ -13,7 +12,7 @@ function submitButtonClick() {
         url: "/submit",
         data: JSON.stringify(payload),
         success: resp => {
-            alert(resp.newId);
+            alert("Added quote resp.newId and set as MOTD!");
             $("#submitButton").attr("disabled", false);
         },
         error: (xhr, ajaxOptions, thrownError) => {
