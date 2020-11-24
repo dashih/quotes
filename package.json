@@ -11,7 +11,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "https": "^1.0.0",
-    "mongodb": "^3.5.8",
+    "mongodb": "^3.6.3",
     "password-prompt": "^1.1.2"
   }
 }
